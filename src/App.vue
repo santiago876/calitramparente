@@ -4,12 +4,13 @@ import AppHeader from './components/AppHeader.vue'
 import WelcomeCard from './components/WelcomeCard.vue'
 import StatCards from './components/StatCards.vue'
 import RiskMap from './components/RiskMap.vue'
+import RedFlags from './components/RedFlags.vue'
 
 const vista = ref('mapa')
 const filtro = ref('todas')
 const mapa = ref(null)
 const explorar = () => mapa.value?.scrollIntoView({ behavior: 'smooth' })
-const banderas = () => { filtro.value = 'alto'; explorar() }
+const banderas = () => { vista.value = 'banderas' }
 </script>
 
 <template>
@@ -20,6 +21,7 @@ const banderas = () => { filtro.value = 'alto'; explorar() }
       <StatCards />
       <div ref="mapa"><RiskMap v-model:filtro="filtro" /></div>
     </template>
-    <p v-else style="margin-top:48px;color:var(--muted)">Vista en construcción.</p>
+    <RedFlags v-else-if="vista === 'banderas'" />
+    <p v-else style="margin:48px 0;color:var(--muted)">Vista en construcción.</p>
   </main>
 </template>
