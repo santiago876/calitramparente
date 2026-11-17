@@ -42,3 +42,37 @@ export async function getJson(path, { signal } = {}) {
     throw new Error('La API respondió con un JSON inválido.')
   }
 }
+
+export async function postJson(path, body, { signal } = {}) {
+  if (!apiBaseUrl) {
+    throw new Error('Falta configurar VITE_API_BASE_URL para enviar reportes.')
+  }
+
+  const endpoint = new URL(path.replace(/^\/+/, ''), `${apiBaseUrl}/`)
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+    signal,
+  })
+
+  if (!response.ok) {
+    const responseText = await response.text()
+    let message = responseText
+
+    try {
+      const body = JSON.parse(responseText)
+      message = body.detail ?? body.message ?? responseText
+    } catch {
+      message = responseText
+    }
+
+    throw new ApiError(
+      `No se pudo enviar el reporte (${response.status})${message ? `: ${message}` : ''}`,
+      response.status,
+    )
+  }
+}

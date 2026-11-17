@@ -1,8 +1,8 @@
 <script setup>
-import { Download } from 'lucide-vue-next'
+import { AlertTriangle } from 'lucide-vue-next'
 defineProps({ vista: String })
-const emit = defineEmits(['update:vista'])
-const tabs = [['mapa', 'Mapa Interactivo'], ['banderas', 'Banderas Rojas'], ['contratos', 'Contratos']]
+const emit = defineEmits(['update:vista', 'report'])
+const tabs = [['mapa', 'Mapa Interactivo'], ['banderas', 'Banderas Rojas'], ['contratos', 'Contratos'], ['informes', 'Informes']]
 </script>
 
 <template>
@@ -21,7 +21,7 @@ const tabs = [['mapa', 'Mapa Interactivo'], ['banderas', 'Banderas Rojas'], ['co
       </nav>
       <div class="right">
         <span class="status"><i></i>Sistema activo</span>
-        <button class="report"><Download :size="16" /> Reportar</button>
+        <button class="report" @click="emit('report')"><AlertTriangle :size="16" /> Reportar</button>
       </div>
     </div>
   </header>
@@ -44,4 +44,6 @@ nav button.on{background:rgba(255,255,255,.14)}
 .status i{width:8px;height:8px;border-radius:50%;background:#2bb673}
 .report{display:flex;gap:8px;align-items:center;background:var(--red);color:#fff;border:0;border-radius:6px;padding:10px 16px;font-weight:600}
 @media(max-width:900px){.nav{flex-wrap:wrap;height:auto;padding:12px 24px;gap:12px}.top span:first-child{display:none}}
+@media(max-width:900px){nav{flex-wrap:wrap}}
+@media(max-width:600px){nav button{padding:9px 12px;font-size:13px}}
 </style>

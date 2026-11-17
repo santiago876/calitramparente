@@ -39,3 +39,38 @@ Si el frontend y la API tienen distintos orígenes, el backend debe permitir med
 ## Alcance actual
 
 Esta primera integración conecta la sección de Banderas Rojas. El mapa y las tarjetas resumen todavía usan datos locales de `src/data/comunas.js`; se pueden conectar mediante servicios adicionales cuando se definan sus endpoints y contratos.
+
+La sección de Informes agrega métricas a partir de los contratos de ejemplo en `src/data/contratos.js`. Sus cifras son demostrativas y no datos oficiales; la sección debe conectarse a un endpoint de contratos antes de usarse como fuente de análisis real.
+
+## Recepción de reportes ciudadanos
+
+El botón **Reportar** abre un formulario que envía un `POST` JSON al endpoint relativo configurado en `VITE_REPORTS_ENDPOINT` (por defecto `/reports`), usando `VITE_API_BASE_URL`. El backend debe aceptar el siguiente cuerpo y responder con un estado HTTP 2xx para confirmar la recepción:
+
+```json
+{
+  "contract_id": "SECOP-II-12345",
+  "category": "Posible sobrecosto o adición",
+  "description": "Descripción de lo observado, con al menos 20 caracteres.",
+  "reporter_name": null,
+  "reporter_email": null
+}
+```
+
+`contract_id`, `reporter_name` y `reporter_email` pueden ser `null`; `category` y `description` son obligatorios. El backend debe validar los datos, proteger contra abuso, almacenar los reportes de forma segura y definir su política de privacidad y retención. Si el API usa otro origen, debe permitir mediante CORS el origen del frontend.
+
+### Backend local
+
+Se agregó un backend FastAPI en `backend/` que guarda reportes en SQLite, en `backend/reports.db` por defecto. Para ejecutarlo en Windows PowerShell:
+
+```powershell
+cd backend
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
+uvicorn app.main:app --reload
+```
+
+La API queda disponible en `http://localhost:8000/api/v1/reports`; la verificación de estado está en `/api/v1/health` y la documentación interactiva de FastAPI en `/docs`. `REPORTS_DB_PATH` permite cambiar el archivo SQLite y `CORS_ORIGINS` configura los orígenes permitidos, separados por comas. El frontend local usa `.env.local` para enviar al servidor de desarrollo; reinicia Vite tras cambiar esa configuración.
+
+Para ejecutar las pruebas desde `backend/`, instala los requisitos y corre `pytest`. Antes de publicar el formulario a internet, agrega controles de abuso (por ejemplo, rate limiting y/o CAPTCHA), decide quién revisará los reportes y establece una política de privacidad y retención. Esta primera versión no incluye una bandeja administrativa ni autenticación para consultar reportes.
