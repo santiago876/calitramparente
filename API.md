@@ -74,3 +74,22 @@ uvicorn app.main:app --reload
 La API queda disponible en `http://localhost:8000/api/v1/reports`; la verificación de estado está en `/api/v1/health` y la documentación interactiva de FastAPI en `/docs`. `REPORTS_DB_PATH` permite cambiar el archivo SQLite y `CORS_ORIGINS` configura los orígenes permitidos, separados por comas. El frontend local usa `.env.local` para enviar al servidor de desarrollo; reinicia Vite tras cambiar esa configuración.
 
 Para ejecutar las pruebas desde `backend/`, instala los requisitos y corre `pytest`. Antes de publicar el formulario a internet, agrega controles de abuso (por ejemplo, rate limiting y/o CAPTCHA), decide quién revisará los reportes y establece una política de privacidad y retención. Esta primera versión no incluye una bandeja administrativa ni autenticación para consultar reportes.
+
+### Publicación de demostración
+
+Esta configuración es solo para una demostración: no envíes reportes reales ni datos personales. El servicio gratuito de Render puede apagarse cuando queda inactivo y su sistema de archivos es temporal; los reportes guardados en `/tmp/reports.db` pueden perderse al reiniciar o desplegar. Para conservar reportes, configura una base de datos persistente antes de aceptar envíos reales.
+
+#### API en Render
+
+1. En Render, crea un **Blueprint** desde este repositorio y acepta la configuración de `render.yaml`.
+2. Render solicitará `CORS_ORIGINS`; configúralo con el origen de producción de Vercel (por ejemplo, `https://tu-proyecto.vercel.app`, sin barra final). Si aún no tienes ese dominio, créalo primero en Vercel y luego configura esta variable desde el panel de Render.
+3. Espera a que termine el despliegue. La API será `https://<nombre-del-servicio>.onrender.com`; verifica `/api/v1/health`.
+
+#### Frontend en Vercel
+
+1. Importa este repositorio en Vercel. Usa la raíz del repositorio, el comando `npm run build` y el directorio de salida `dist`.
+2. Crea el despliegue para obtener el dominio de producción de Vercel.
+3. En las variables de entorno de producción, define `VITE_API_BASE_URL` como `https://<nombre-del-servicio>.onrender.com/api/v1` y despliega de nuevo.
+4. Vuelve a Render y configura `CORS_ORIGINS` con el dominio de producción de Vercel.
+
+El frontend también conserva la publicación de GitHub Pages: el workflow define `VITE_BASE_PATH=/calitramparente/`; Vercel usa `/` por defecto.
